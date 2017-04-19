@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://www.wingzero.tw/jquery/video/video.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>Video</title>
+<style>
+.track{
+	padding-top:10px;
+}
+.track_bar{
+	position:relative;
+	cursor:pointer;
+	width:318px;
+	height:10px;
+	/*height:10px;*/
+	border:1px solid #666;
+	border-radius:4px;
+	background-image: linear-gradient(bottom, rgb(163,163,163) 0%, rgb(235,235,235) 50%, rgb(158,158,158) 100%);
+background-image: -o-linear-gradient(bottom, rgb(163,163,163) 0%, rgb(235,235,235) 50%, rgb(158,158,158) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(163,163,163) 0%, rgb(235,235,235) 50%, rgb(158,158,158) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(163,163,163) 0%, rgb(235,235,235) 50%, rgb(158,158,158) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(163,163,163) 0%, rgb(235,235,235) 50%, rgb(158,158,158) 100%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0, rgb(163,163,163)),
+	color-stop(0.5, rgb(235,235,235)),
+	color-stop(1, rgb(158,158,158))
+);
+}
+.now_position{
+	cursor:pointer;
+	position:absolute;
+	bottom:-6px;
+	width:10px;
+	height:22px;
+	background-image: linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -o-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0, rgb(194,194,194)),
+	color-stop(1, rgb(255,255,255))
+);
+border:#666 1px solid;
+border-radius:2px;
+	
+}
+.changeto{
+	display:inline-block;
+	padding:2px 10px;
+	margin:2px;
+	cursor:pointer;
+	background-image: linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -o-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -moz-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -webkit-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+background-image: -ms-linear-gradient(bottom, rgb(194,194,194) 0%, rgb(255,255,255) 100%);
+
+background-image: -webkit-gradient(
+	linear,
+	left bottom,
+	left top,
+	color-stop(0, rgb(194,194,194)),
+	color-stop(1, rgb(255,255,255))
+);
+border:#666 1px solid;
+border-radius:2px;
+}
+</style>
+<script src="jquery.js"></script>
+<script src="jquery.timer.js"></script>
+
+<script>
+$(function(){
+	//計時器
+	var count = 0;
+	var timer = $.timer(
+		function() {
+			count++;
+			$('.count').html(count);
+		},
+		1000,
+		false
+	);	
+	//影片
+	var video=$("#myvideo")[0];
+	var videoStateTexts = [  
+        'HAVE_NOTHING','HAVE_METADATA','HAVE_CURRENT_DATA',  
+        'HAVE_FUTURE_DATA','HAVE_ENOUGH_DATA'  
+    ]; 
+	var pr = ['currentTime', 'duration', 'readyState','paused','muted','volume','ended'];  
+	var statelist = $('#statelist');
+
+		
+    $("#play").click(function(){  
+        video.play(); //播放影片  
+		timer.play();
+		
+    });  
+  
+    $("#pause").click(function(){  
+        video.pause(); //停止播放  
+		timer.pause();
+    }); 
+	
+	var t = setInterval(function(){  
+        statelist.empty();  
+		var now=(video["currentTime"]/video["duration"])*318;
+		$(".now_position").css("left",now);
+		
+		/*如果再某個條件(以下範例為時間)時，快速跳到指定秒數
+		if(video.currentTime>5 && video.currentTime<5.2){
+			video.currentTime=10;
+		}
+		*/
+		if(video.currentTime>5 && video.currentTime<5.2){
+			$("#quest").show("slow");
+		}
+		if(count>30){
+			$("#quest").hide("slow");
+			$("#quest_timeout").show("slow");
+		}
+		
+		//$(".now_position").css("left","");
+        $('#state').text(videoStateTexts[video.readyState]);  
+
+        for(x in pr){  
+            statelist.append($('<li><storng>'+ pr[x]  + ' : ' + video[pr[x]] + '</strong></li>'));  
+        }  
+    },100);  
+
+	//計時器
+	var t2 = setInterval(function(){ 	
+		if(video[pr[3]]==true){
+			timer.pause();
+		}else{
+			timer.play();
+		}
+	},100);  
+	
+
+		
+	$(".changeto").click(function(){
+		$go_track=$(this).attr("alt");
+		video.currentTime=$go_track;
+		//video[currentTime]=$go_track;
+	});
+	
+	//純js寫法可參考 http://www.w3schools.com/tags/av_prop_paused.asp
+	//var vid = document.getElementById("myvideo");
+	//alert(vid.paused);
+	$("#alert").click(function(){
+		alert(video[pr[3]]);
+	});
+		
+
+		
+	//跳轉時間
+	var clicking=false;
+	$(".track_bar").mousedown(function(e){
+		clicking=true;
+		video.currentTime=(e.pageX*video["duration"])/318-2.5;
+	});
+	$(".track_bar").mouseup(function(e){
+		clicking=false;
+	});
+	$("#Status").mousemove(function(e){
+		if(clicking == false) return;
+		video.currentTime=(e.pageX*video["duration"])/318-2.5;
+	});
+
+	window.onbeforeunload = function () {
+	return "要離開視窗囉！，會被判定為未作答完成喔";
+	}
+	
+});
+</script>
+
+</head>
+
+<body>
+<video id="myvideo" controls="" style="width:330px">  
+			<source src="1.mp4">
+            <!--<source src="video.m4v">-->
+            很抱歉！您的瀏覽器不支援 HTML5 Video  
+</video> 
+<!--
+自製時間軸
+<div class="track"> 
+<div class="track_bar"><div class="now_position"></div></div>
+-->
+</div><!--track-->
+<br/>
+<button id="play">Play</button><button id="pause">Pause</button><button id="alert">檢查影片是否暫停中</button><br/>
+<!--快速跳秒數
+<span class="changeto" alt="6">sec 6</span>
+<span class="changeto" alt="15">sec 15</span>
+<span class="changeto" alt="40">sec 40</span>
+-->
+看完後下方會顯示作答頁連結(目前先設定撥5秒就出現在下方)<br>
+<div id='quest' style="display:none"><a href="http://www.google.com.tw" style="font-size:24px">前往作答頁(在這個範例點選會導向Google)</a><br>只會出現30秒，之後會消失(防發呆)</div>
+<div id='quest_timeout' style="display:none">請在作答按鈕出現時點選前往作答</div>
+
+<p>總撥放時數<span class='count'>0</span>秒</p>
+
+<ul id="statelist"></ul>
+
+
+<pre>
+http://www.w3schools.com/tags/av_prop_paused.asp
+可以用這個偵測影片是否在暫停狀態，再搭配個計時器，如果暫停中就不計時，這樣就可以知道使用者播放影片的總時間了
+
+
+
+設定間隔時間需多長 (WaitTime)
+閱讀開始：前台給一個code 資料庫記錄該code、開始時間、完成狀態  使用者 宣教編號 開始時間 結束時間
+閱讀結束 
+作答去的檢查頁：是否有該code，且開始時間與結束時間間隔大於WaitTime，通過後將該code標示為完成，帶著該code進入作答內容頁
+填寫完成作答內容：檢查該code是否為已完成，已完成才檢查作答是否正確 
+</pre>
+
+</body>
+</html>
